@@ -1,19 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { ToolEntity } from "./tool.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Tool } from './tool.entity';
 
-@Entity("loan_requests")
+@Entity('loan_requests')
 export class LoanRequestEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-  @Column({ type: "varchar", length: 120 })
+  @Column()
   purpose!: string;
 
-  @Column({ type: "integer" })
+  @Column()
   days!: number;
 
-  @ManyToOne(() => ToolEntity, { nullable: false })
-  @JoinColumn({ name: "tool_id" })
-  tool!: ToolEntity;
+  @ManyToOne(() => Tool, (tool) => tool.loanRequests, { eager: true, onDelete: 'CASCADE' })
+  tool!: Tool;
 }
-

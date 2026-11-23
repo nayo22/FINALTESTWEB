@@ -1,14 +1,17 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { LoanRequest, LoanRequestEntity } from './loan-request.entity';
 
-@Entity("tools")
-export class ToolEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+@Entity('tools')
+export class Tool {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-  @Column({ type: "varchar", length: 80 })
+  @Column()
   name!: string;
 
-  @Column({ type: "integer" })
-  maxLoanDays!: number;
-}
+  @Column()
+  maxLimit!: number;
 
+  @OneToMany(() => LoanRequest, (loanRequest) => LoanRequestEntity.tool)
+  loanRequests!: LoanRequest[];
+}
