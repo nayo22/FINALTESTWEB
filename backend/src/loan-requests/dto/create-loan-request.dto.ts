@@ -1,19 +1,18 @@
 import { Transform } from "class-transformer";
-import { IsInt, IsNotEmpty, IsString, MaxLength, Min } from "class-validator";
+import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
 
 export class CreateLoanRequestDto {
-  @Transform(({ value }) => typeof value === "string" ? value.trim() : value)
-  @IsString()
   @IsNotEmpty()
-  @MaxLength(120)
+  @IsString()
   purpose!: string;
 
-  @IsInt()
+  @IsNotEmpty()
+  @IsNumber()
   @Min(1)
   days!: number;
 
-  @IsInt()
-  @Min(1)
-  toolId!: number;
+  @IsNotEmpty()
+  @IsString()
+  toolId!: string;
 }
 

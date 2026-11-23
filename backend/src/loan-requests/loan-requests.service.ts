@@ -5,6 +5,7 @@ import { CreateLoanRequestDto } from "./dto/create-loan-request.dto";
 import { LoanRequestEntity } from "./loan-request.entity";
 import { ToolEntity } from "./tool.entity";
 
+
 @Injectable()
 export class LoanRequestsService {
   constructor(
@@ -12,9 +13,11 @@ export class LoanRequestsService {
     @InjectRepository(ToolEntity) private readonly tools: Repository<ToolEntity>,
   ) {}
 
-  findAll() {
+  findAll(request?:LoanRequestEntity) {
     // TODO BACK-A: recibir el filtro y aplicarlo en la consulta del repositorio.
-    return this.requests.find({ relations: { tool: true }, order: { id: "ASC" } });
+    return this.requests.find({
+       relations: { tool: true }, 
+       order: { id: "ASC" } });
   }
 
   async findOne(id: number) {
