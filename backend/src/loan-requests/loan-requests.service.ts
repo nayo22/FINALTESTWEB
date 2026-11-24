@@ -1,39 +1,61 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { CreateLoanRequestDto } from "./dto/create-loan-request.dto";
-import { LoanRequestEntity } from "./loan-request.entity";
-import { ToolEntity } from "./tool.entity";
-
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { LoanRequestEntity } from './loan-request.entity';
+import { Tool } from './tool.entity';
+import { CreateLoanRequestDto } from './dto/create-loan-request.dto';
 
 @Injectable()
 export class LoanRequestsService {
   constructor(
-    @InjectRepository(LoanRequestEntity) private readonly requests: Repository<LoanRequestEntity>,
-    @InjectRepository(ToolEntity) private readonly tools: Repository<ToolEntity>,
+    @InjectRepository(LoanRequestEntity)
+    private readonly loanRequestRepo: Repository<LoanRequestEntity>,
+    @InjectRepository(Tool)
+    private readonly toolRepo: Repository<Tool>,
   ) {}
 
-  findAll(request?:LoanRequestEntity) {
-    // TODO BACK-A: recibir el filtro y aplicarlo en la consulta del repositorio.
-    return this.requests.find({
-       relations: { tool: true }, 
-       order: { id: "ASC" } });
+  async findAll(toolId?: string): Promise<LoanRequestEntity[]> {
+    const query = this.loanRequestRepo.createQueryBuilder('loanRequest')
+      .leftJoinAndSelect('loanRequest.tool', 'tool');
+
+    if (toolId && toolId !== 'all') {
+      query.andWhere('tool.id = :toolId OR tool.name = :toolId', { toolId });
+    }
+
+    return query.getMany();
   }
 
-  async findOne(id: number) {
-    const request = await this.requests.findOne({ where: { id }, relations: { tool: true } });
-    if (!request) throw new NotFoundException("Loan request not found.");
+  async findOne(id: string): Promise<LoanRequestEntity> {
+    const request = await this.loanRequestRepo.findOne({
+      where: { id },
+      relations: ['tool'],
+    });
+
+    if (!request) {
+      throw new NotFoundException(`no se encontro la solicitud con id ${id}`);
+    }
+
     return request;
   }
 
-  async create(dto: CreateLoanRequestDto) {
-    const tool = await this.tools.findOneBy({ id: dto.toolId });
-    if (!tool) throw new NotFoundException("Tool not found.");
+  async create(createDto: CreateLoanRequestDto): Promise<LoanRequestEntity> {
+    const tool = await this.toolRepo.findOne({ where: { id: createDto.toolId } });
+    
+    if (!tool) {
+      throw new NotFoundException('esa herramienta no existe');
+    }
 
-    // TODO BACK-B: aplicar la regla de duración antes de guardar la solicitud.
+    
+    if (createDto.days > tool.maxLimit) {
+      throw new BadRequestException(`los dias solicitados (${createDto.days}) superan el limite máximo que hay para esta herramienta unu:(${tool.maxLimit} dias).`);
+    }
 
-    const request = this.requests.create({ purpose: dto.purpose, days: dto.days, tool });
-    return this.requests.save(request);
+    const newRequest = this.loanRequestRepo.create({
+      purpose: createDto.purpose,
+      days: createDto.days,
+      tool,
+    });
+
+    return this.loanRequestRepo.save(newRequest);
   }
 }
-

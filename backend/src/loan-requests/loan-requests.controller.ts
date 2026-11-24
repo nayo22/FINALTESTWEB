@@ -1,28 +1,24 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { requestValidationPipe } from "../common/request-validation.pipe";
-import { CreateLoanRequestDto } from "./dto/create-loan-request.dto";
-import { LoanRequestsService } from "./loan-requests.service";
-import { ListLoanRequestsDto } from "./dto/list-loan-requests.dto";
+import { Controller, Get, Post, Body, Param, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { LoanRequestsService } from './loan-requests.service';
+import { CreateLoanRequestDto } from './dto/create-loan-request.dto';
 
-@UseGuards(AuthGuard("jwt"))
-@Controller("loan-requests")
+@Controller('loan-requests')
 export class LoanRequestsController {
-  constructor(private readonly service: LoanRequestsService) {}
+  constructor(private readonly loanRequestsService: LoanRequestsService) {}
 
   @Get()
-  findAll(@Query(requestValidationPipe) Query: ListLoanRequestsDto) {
-    return this.service.findAll();
+  findAll(@Query('tool') tool?: string) {
+    return this.loanRequestsService.findAll(tool);
   }
 
-  @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.loanRequestsService.findOne(id);
   }
 
   @Post()
-  create(@Body(requestValidationPipe) dto: CreateLoanRequestDto) {
-    return this.service.create(dto);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  create(@Body() createLoanRequestDto: CreateLoanRequestDto) {
+    return this.loanRequestsService.create(createLoanRequestDto);
   }
 }
-

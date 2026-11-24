@@ -5,7 +5,7 @@ import { apiFetch } from "../../lib/api";
 import type { Tool } from "../../lib/loan-types";
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { apiGet } from '@/lib/api';
+
 
 interface LoanRequest {
   id: string;
@@ -38,7 +38,7 @@ export default function LoanRequestsPage() {
         const data = await apiGet(endpoint);
         setRequests(data);
       } catch (err: any) {
-        setError(err.message || 'Error al cargar las solicitudes');
+        setError(err.message || 'hubo un error al cargar');
       } finally {
         setLoading(false);
       }
@@ -57,51 +57,51 @@ export default function LoanRequestsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Solicitudes de Préstamo</h1>
+    <div >
+      <div >
+        <h1>solicitudes de loan</h1>
         <Link 
           href="/loan-requests/new" 
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Nueva Solicitud
+ >
+          add nueva solicitud
         </Link>
       </div>
 
       
-      <div className="mb-6 flex items-center gap-3">
-        <label htmlFor="toolFilter" className="font-medium text-gray-700">Filtrar por herramienta:</label>
+      <div>
+        <label htmlFor="toolFilter">filtrar por tipo d herramienta:</label>
         <select
           id="toolFilter"
           value={toolFilter}
           onChange={handleFilterChange}
-          className="border rounded px-3 py-2 bg-white"
-        >
-          <option value="all">All tools</option>
+        
+        ><option value="all">todas las tools</option>
+          <option value="one">electric drill</option>
+          <option value="two">sewing machine</option>
           
         </select>
       </div>
 
-      {loading && <p>Cargando solicitudes...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {loading && <p>Loading</p>}
+      {error && <p >{error}</p>}
 
       {!loading && !error && requests.length === 0 && (
-        <p className="text-gray-500">No hay solicitudes registradas.</p>
+        <p>no hay solicitudes</p>
       )}
 
-      <div className="grid gap-4">
+      <div>
         {requests.map((req) => (
-          <div key={req.id} className="border p-4 rounded shadow-sm bg-white flex justify-between items-center">
+          <div key={req.id} >
             <div>
-              <p className="font-semibold text-lg">Herramienta: {req.tool?.name}</p>
-              <p className="text-gray-600 text-sm">Propósito: {req.purpose}</p>
-              <p className="text-gray-500 text-xs">Duración: {req.days} días</p>
+              <p >Herramienta: {req.tool?.name}</p>
+              <p >Propósito: {req.purpose}</p>
+              <p >Duración: {req.days} días</p>
             </div>
             <Link 
               href={`/loan-requests/${req.id}`}
-              className="text-blue-600 hover:underline text-sm font-medium"
+              
             >
-              Ver Comprobante
+            vVer Comprobante
             </Link>
           </div>
         ))}
